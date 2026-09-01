@@ -1,4 +1,4 @@
-/* Baran runtime loader. Keeps the original storefront UI logic and adds the live Supabase layer. */
+/* Baran runtime loader — legacy UI + complete i18n + live Supabase layer. */
 (function(){
   const rawBase='https://raw.githubusercontent.com/vipstoreios/Baran-candle-shop/main/';
   const legacy='https://raw.githubusercontent.com/vipstoreios/Baran-candle-shop/da4795c863aacd087405c229bb51df472f9c57f8/script.js';
@@ -6,6 +6,7 @@
   async function boot(){
     try{
       await load(legacy);
+      await load(rawBase+'i18n-fix.js');
       await load('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js');
       await load(rawBase+'supabase-config.js');
       await load(rawBase+'baran-live.js');
