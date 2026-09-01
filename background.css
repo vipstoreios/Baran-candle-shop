@@ -1,0 +1,21 @@
+/* Baran Candle Shop — custom hero background */
+.hero-visual {
+  background-image:
+    linear-gradient(180deg, rgba(35, 27, 20, 0.08), rgba(35, 27, 20, 0.42)),
+    url('https://i.postimg.cc/mrt0kt6B/IMG-6964.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.hero-visual::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(35,27,20,0.16));
+  z-index: 1;
+  pointer-events: none;
+}
+.hero-visual > * { z-index: 2; }
+@media (max-width: 760px) {
+  .hero-visual { background-position: center center; }
+}
