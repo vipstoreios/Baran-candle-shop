@@ -16,16 +16,21 @@
   function updateCount(n){ensureBadge();const e=document.querySelector('#baranLiveVisitors .baran-live-copy b');if(e)e.textContent=String(Number(n)||0);updateLabel()}
   async function refreshCount(){if(!client)return;const{data,error}=await client.rpc('get_live_visitor_count');if(!error)updateCount(data)}
   async function heartbeat(){if(!client||!sessionId||document.visibilityState==='hidden')return;await client.rpc('visitor_heartbeat',{p_session_id:sessionId,p_page_path:location.pathname||'/'});await refreshCount()}
-  async function loadCMS(){
-    if(!client)return;
-    const{data}=await client.from('site_content').select('*').eq('active',true).order('sort_order');
-    if(!data?.length)return;
-    const lang=localStorage.getItem('baran-language')||'badini';
-    const map=Object.fromEntries(data.map(r=>[r.content_key,r]));
-    document.querySelectorAll('[data-i18n]').forEach(el=>{const r=map[el.dataset.i18n];if(!r)return;const v=r[lang]??r.badini;if(r.content_type==='html')el.innerHTML=v;else el.textContent=v});
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const r=map[el.dataset.i18nPlaceholder];if(r)el.placeholder=r[lang]??r.badini});
-    const badge=map.collectionBadge,be=document.querySelector('.collection-badge');if(badge&&be)be.textContent=badge[lang]??badge.badini;
-  }
+  async function loadCMS(){if(!client)return;const{data}=await client.from('site_content').select('*').eq('active',true).order('sort_order');if(!data?.length)return;const lang=localStorage.getItem('baran-language')||'badini';const map=Object.fromEntries(data.map(r=>[r.content_key,r]));document.querySelectorAll('[data-i18n]').forEach(el=>{const r=map[el.dataset.i18n];if(!r)return;const v=r[lang]??r.badini;if(r.content_type==='html')el.innerHTML=v;else el.textContent=v});document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const r=map[el.dataset.i18nPlaceholder];if(r)el.placeholder=r[lang]??r.badini});const badge=map.collectionBadge,be=document.querySelector('.collection-badge');if(badge&&be)be.textContent=badge[lang]??badge.badini}
   async function start(){try{await loadSupabase();if(!window.supabase?.createClient)return;client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);const visitorId=getPersistentId(VISITOR_KEY);sessionId=getPersistentId(SESSION_KEY);const language=localStorage.getItem('baran-language')||'badini',pagePath=location.pathname||'/',today=new Date().toISOString().slice(0,10);const{error:liveError}=await client.rpc('track_live_visitor',{p_visitor_id:visitorId,p_session_id:sessionId,p_page_path:pagePath,p_language:language,p_user_agent:navigator.userAgent||''});if(liveError)throw liveError;await client.rpc('track_page_view',{p_visitor_id:visitorId,p_session_id:sessionId,p_page_path:pagePath,p_language:language});if(localStorage.getItem(UNIQUE_DAY_KEY)!==today){localStorage.setItem(UNIQUE_DAY_KEY,today);await client.rpc('track_unique_visitor',{p_visitor_id:visitorId,p_session_id:sessionId,p_page_path:pagePath,p_language:language})}ensureBadge();await refreshCount();await loadCMS();setInterval(heartbeat,30000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')heartbeat()})}catch(e){console.warn('[Baran]',e?.message||e)}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+
+/* Load the storefront database/image fix after the visitor bootstrap. */
+(() => {
+  const loadFix = () => {
+    if (document.getElementById('baran-storefront-products-fix')) return;
+    const s = document.createElement('script');
+    s.id = 'baran-storefront-products-fix';
+    s.src = 'storefront-products-fix.js?v=2';
+    s.async = true;
+    document.body.appendChild(s);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadFix, {once:true});
+  else loadFix();
 })();
