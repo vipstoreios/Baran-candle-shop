@@ -3,20 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="refresh" content="0; url=../admin.html">
   <title>Baran Candle Shop — Admin</title>
-  <link rel="stylesheet" href="../admin.css">
 </head>
 <body>
+  <p>چوونەژوورەوەی بەڕێوەبەر...</p>
   <script>
-    // GitHub Pages /admin route: load the real admin entry without redirect loops.
-    fetch('../admin.html').then(r => r.text()).then(html => {
-      document.open();
-      document.write(html);
-      document.close();
-    }).catch(() => {
-      window.location.href = '../admin.html';
-    });
+    window.location.replace('../admin.html');
   </script>
-  <noscript><a href="../admin.html">چوونەژوورەوەی بەڕێوەبەر</a></noscript>
 </body>
 </html>
