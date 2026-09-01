@@ -8,9 +8,8 @@
   let rows = [];
 
   const adminWords = {
-    dashboard:'سەرەکی', products:'بەرهەم', orders:'داواکاری', customers:'کڕیار', categories:'پۆلێن', scents:'بۆن', content:'دەق و ناوەڕۆک', settings:'ڕێکخستن',
-    newProduct:'بەرهەمی نوێ', save:'هەڵگرتن', cancel:'پاشگەزبوونەوە', edit:'دەستکاری', delete:'سڕینەوە', search:'گەڕان', active:'چالاک', inactive:'ناچالاک',
-    language:'زمان', badini:'بادینی دهۆکی', sorani:'سۆرانی', arabic:'عەرەبی عێراقی', english:'ئینگلیزی', section:'بەش', key:'کلیلی دەق', updated:'نوێکراوەتەوە'
+    content:'دەق و ناوەڕۆک', save:'هەڵگرتن', search:'گەڕان',
+    badini:'بادینی دهۆکی', sorani:'سۆرانی', arabic:'عەرەبی عێراقی', english:'ئینگلیزی'
   };
 
   function addStyles(){
@@ -39,11 +38,13 @@
     aside.insertBefore(b, aside.querySelector('[data-tab="settings"]'));
     const sec=document.createElement('section'); sec.id='cmsPage'; sec.className='page';
     sec.innerHTML=`<div class="title"><div><div class="eyebrow">BARAN</div><h1>${adminWords.content}</h1></div></div>
-      <div class="cms-toolbar"><input id="cmsSearch" placeholder="گەڕان ل ناڤ دەقان..." aria-label="گەڕان"><select id="cmsSection"><option value="">هەمی بەش</option></select><button id="cmsReload" class="btn">نویکرن</button></div>
+      <div class="cms-toolbar"><input id="cmsSearch" placeholder="گەڕان ل ناڤ دەقان..." aria-label="گەڕان"><select id="cmsSection"><option value="">هەمی بەش</option></select><button id="cmsReload" class="btn" type="button">نویکرن</button></div>
       <div id="cmsList" class="cms-list"></div>`;
     main.appendChild(sec);
     b.addEventListener('click',()=>{document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));sec.classList.add('active');document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));load();});
-    $('#cmsSearch').addEventListener('input',render); $('#cmsSection').addEventListener('change',render); $('#cmsReload').addEventListener('click',load);
+    $('#cmsSearch').addEventListener('input',render);
+    $('#cmsSection').addEventListener('change',render);
+    $('#cmsReload').addEventListener('click',load);
     addStyles();
   }
 
@@ -57,20 +58,24 @@
   }
 
   function render(){
-    const q=($('#cmsSearch')?.value||'').toLowerCase(); const section=$('#cmsSection')?.value||'';
+    const q=($('#cmsSearch')?.value||'').toLowerCase();
+    const section=$('#cmsSection')?.value||'';
     const list=rows.filter(r=>(!section||r.section===section)&&(!q||`${r.content_key} ${r.badini} ${r.sorani} ${r.arabic} ${r.english}`.toLowerCase().includes(q)));
     $('#cmsList').innerHTML=list.map(r=>`<article class="cms-card" data-cms-id="${esc(r.id)}"><div class="cms-head"><strong>${esc(r.content_key)}</strong><span class="eyebrow">${esc(r.section)}</span></div><div class="cms-grid">
       <label>${adminWords.badini}<textarea data-field="badini">${esc(r.badini)}</textarea></label>
       <label>${adminWords.sorani}<textarea data-field="sorani">${esc(r.sorani)}</textarea></label>
       <label>${adminWords.arabic}<textarea data-field="arabic" dir="rtl">${esc(r.arabic)}</textarea></label>
       <label>${adminWords.english}<textarea data-field="english" dir="ltr">${esc(r.english)}</textarea></label>
-    </div><button class="btn cms-save" data-save-cms="${esc(r.id)}">${adminWords.save}</button><span class="error" data-msg></span></article>`).join('')||'<div class="panel">هیچ دەقێک نەدۆزرایەوە.</div>';
+    </div><button class="btn cms-save" type="button" data-save-cms="${esc(r.id)}">${adminWords.save}</button><span class="error" data-msg></span></article>`).join('')||'<div class="panel">هیچ دەقێک نەدۆزرایەوە.</div>';
     document.querySelectorAll('[data-save-cms]').forEach(btn=>btn.addEventListener('click',save));
   }
 
   async function save(e){
-    const btn=e.currentTarget, card=btn.closest('[data-cms-id]'), id=card.dataset.cmsId;
-    const payload={}; card.querySelectorAll('[data-field]').forEach(x=>payload[x.dataset.field]=x.value);
+    const btn=e.currentTarget;
+    const card=btn.closest('[data-cms-id]');
+    const id=card.dataset.cmsId;
+    const payload={};
+    card.querySelectorAll('[data-field]').forEach(x=>payload[x.dataset.field]=x.value);
     btn.disabled=true;
     const {error}=await db.from('site_content').update(payload).eq('id',id);
     btn.disabled=false;
@@ -81,14 +86,26 @@
   }
 
   function localizeAdmin(){
-    const map={Dashboard:'سەرەکی',Products:'بەرهەم',Orders:'داواکاری',Customers:'کڕیار',Settings:'ڕێکخستن',Logout:'دەرکەفتن',Store:'ماڵپەڕ',Sales:'فرۆتن',Orders:'داواکاری',Products:'بەرهەم',Customers:'کڕیار',Latest:'دوماهی',New:'نوێ',Edit:'دەستکاری',Delete:'سڕینەوە'};
-    document.querySelectorAll('aside button,.top button,.top a').forEach(el=>{const t=el.textContent.trim(); if(map[t])el.textContent=map[t];});
-    const title=document.querySelector('#dashboard h1'); if(title)title.textContent='سەرەکی';
+    const map={
+      Dashboard:'سەرەکی', Products:'بەرهەم', Orders:'داواکاری', Customers:'کڕیار',
+      Settings:'ڕێکخستن', Logout:'دەرکەفتن', Store:'ماڵپەڕ', Sales:'فرۆتن',
+      Latest:'دوماهی', New:'نوێ', Edit:'دەستکاری', Delete:'سڕینەوە'
+    };
+    document.querySelectorAll('aside button,.top button,.top a').forEach(el=>{
+      const t=el.textContent.trim();
+      if(map[t] && el.textContent!==map[t]) el.textContent=map[t];
+    });
+    const title=document.querySelector('#dashboard h1');
+    if(title && title.textContent!=='سەرەکی') title.textContent='سەرەکی';
   }
 
   function boot(){
-    inject(); localizeAdmin();
-    const observer=new MutationObserver(()=>localizeAdmin()); observer.observe(document.body,{subtree:true,childList:true});
+    inject();
+    localizeAdmin();
+    // Do not use a MutationObserver here: changing textContent itself creates
+    // childList mutations and the old observer could continuously retrigger.
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
+  else boot();
 })();
