@@ -7,7 +7,7 @@
 
   const URL = 'https://oyaczputirsxfmphnlsh.supabase.co';
   const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzIiwicmVmIjoib3lhY3pwdXRpcnN4Zm1waG5sc2giLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4ODI1NDQ3NSwiZXhwIjoyMTAzODMwNDc1fQ.fiOo-DfZAHC2vhge9W4_IAbIEVDsP3xtSFkHFgHXE0M';
-  const SIGNATURE_KEY = 'baran-products-signature-v2';
+  const SIGNATURE_KEY = 'baran-products-signature-v3';
   let db;
   let reloading = false;
 
@@ -19,7 +19,7 @@
 
   async function getSignature() {
     const response = await fetch(
-      URL + '/rest/v1/products?select=id,active,image_url,images,price,stock,category_id,created_at,updated_at&order=created_at.asc',
+      URL + '/rest/v1/products?select=*&order=created_at.asc',
       {
         headers: {
           apikey: KEY,
